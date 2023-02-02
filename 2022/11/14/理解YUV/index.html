@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Cookies">
+
+
+
+
+
+<title>理解 YUV | Cookies</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Cookies</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Cookies</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6; // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function() {
+            tocbot.refresh(obj_merge(tocbot_default_config, {
+                hasInnerContainers: true
+            }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function() {
+        tocbot.init(obj_merge(tocbot_default_config, {
+            collapseDepth: 1
+        }));
+    });
+
+    function expand_toc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, {
+            collapseDepth: expanded ? 1 : DEPTH_MAX
+        }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">理解 YUV</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Cookies</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">November 14, 2022&nbsp;&nbsp;17:02:05</a>
+                        </span>
+                    
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p><img src="/2022/11/14/%E7%90%86%E8%A7%A3YUV/banner.png"></p>
+<h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>古早古早以前，从黑白电视到出现彩色电视时。为了兼容黑白电视，发明了 YUV 这一产物。<br>黑白电视只有灰度。而彩色电视在黑白电视的灰度基础上增添了色度。从历史的演变来说，YUV 通常用来编码电视的模拟信号，而YCbCr则是用来描述数字的影像信号，适合视频与图片压缩以及传输，例如MPEG、JPEG。 但在现今，YUV通常已经在电脑系统上广泛使用。</p>
+<h2 id="理论"><a href="#理论" class="headerlink" title="理论"></a>理论</h2><p>YUV，是一种颜色编码方法。一般指的是 YCbCr，其中Y是指亮分量，Cb指蓝色色度分量，而Cr指红色色度分量。称为 YCbCr， 用冗长的话说就是 由灰度、蓝色色度、红色色度组成数字影像信号。<br>它常使用在各个影像处理组件中。 YUV在对照片或视频编码时，利用人眼对亮度的敏感要比色度要高的生物原理，允许我们调整色度带宽。称色度子采样<br>为此 YUV也衍生了三种取样格式 YUV 420，YUV 422，YUV 444。三大平面类型：Planar，Semi-Planar 和 Packed</p>
+<h3 id="子采样格式："><a href="#子采样格式：" class="headerlink" title="子采样格式："></a>子采样格式：</h3><p>我们已经知道 y代表亮度、uv代表色度，而跟随其后的 420、422、 444 则是一种叫  J：a：b 的模式<br><img src="/2022/11/14/%E7%90%86%E8%A7%A3YUV/444.png"> </p>
+<p><img src="/2022/11/14/%E7%90%86%E8%A7%A3YUV/422.png"></p>
+<p><img src="/2022/11/14/%E7%90%86%E8%A7%A3YUV/420.png"><br>￼￼￼<br>如图上图，实心黑色圆圈表示包含色度像素(Cb+Cr），空心圆圈表示不包含色度像素。对于 J:a:b 模式，主要是围绕参考块的概念定义的，这个参考块是一个 J x 2 的矩形，J 通常是 4。这样，此参考块就是宽度有 4 个像素、高度有 2 个像素的矩形。a 表示参考块的第一行包含的色度像素样本数，b 表示在参考块的第二行包含的色度像素样本数。<br>比如，<br>4：4：4 水平方向是1&#x2F;1，垂直方向是1&#x2F;1，表示一个色度像素对应了一个图形像素。<br>4：2：2 水平方向是1&#x2F;2，垂直方向是1&#x2F;1，表示一个色度像素对应了两个图形像素。<br>4：2：0 水平方向是1&#x2F;2，垂直方向是1&#x2F;2，表示一个色度像素对应了四个图形像素</p>
+<p>到这里还有一个问题，一个色度像素对应的图形像素，那么 uv 是有两种色度的怎么知道取 u 还是 v ？</p>
+<h3 id="平面类型（存储格式）"><a href="#平面类型（存储格式）" class="headerlink" title="平面类型（存储格式）:"></a>平面类型（存储格式）:</h3><p>平面类型描述的是 YUV 他们存放的位置，</p>
+<ol>
+<li>平面Planar：YUV分别存放与不同的平面</li>
+<li>混合平面Semi-Planar：Y单独存放一个平面，UV交织存放</li>
+<li>交织Packed(Interleaved)：YUV交替存放</li>
+</ol>
+<p>例如以 YUV420 来说：一张 6 * 4 的的平面格式和混合平面格式存放的YUV位置如下：</p>
+<p>￼<img src="/2022/11/14/%E7%90%86%E8%A7%A3YUV/yuv420p.png"><br>￼￼<br>￼<img src="/2022/11/14/%E7%90%86%E8%A7%A3YUV/yuv420sp.png"></p>
+<p>￼<br>以上只是列举了其中两种，完整的常用的如下。先能起到抛砖引玉的，后面这些有机会再补充进来，因为太多了：<br>￼<img src="/2022/11/14/%E7%90%86%E8%A7%A3YUV/yuvformat.jpg"></p>
+<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><p>拿一张 2560 * 1440 I420 yuv420p(I420)格式的图片来测试，</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">int w = 2560;</span><br><span class="line">int h = 1440;</span><br><span class="line"></span><br><span class="line">struct YUVBuffer yuv = &#123;0&#125;;</span><br><span class="line">    </span><br><span class="line">yuv.length = (int)_yuvFileData.length;</span><br><span class="line"></span><br><span class="line">yuv.w = w;</span><br><span class="line">yuv.h = h;</span><br><span class="line"></span><br><span class="line">yuv.buffer[Y_TYPE] = malloc(w * h);</span><br><span class="line">yuv.buffer[U_TYPE] = malloc(w * h / 4);</span><br><span class="line">yuv.buffer[V_TYPE] = malloc(w * h / 4);</span><br><span class="line"></span><br><span class="line">memmove(yuv.buffer[Y_TYPE], _yuvFileData.bytes, w * h);</span><br><span class="line">memmove(yuv.buffer[U_TYPE], _yuvFileData.bytes + w * h, w * h / 4);</span><br><span class="line">memmove(yuv.buffer[V_TYPE], _yuvFileData.bytes + w * h + w * h / 4, w * h / 4);</span><br><span class="line"></span><br><span class="line">return yuv;</span><br></pre></td></tr></table></figure>
+<p>￼<img src="/2022/11/14/%E7%90%86%E8%A7%A3YUV/example.JPEG"></p>
+<h3 id="内存占用"><a href="#内存占用" class="headerlink" title="内存占用:"></a>内存占用:</h3><p>Y 的长度是 宽 * 高这个没毛病<br>因为是 420 格式，一个色度像素对应了四个图形像素：所以我们知道 uv 的长度是 宽 * 高 &#x2F; 4。同理 类推。<br>最终的长度是： <strong>2560 * 1440 + (2560 * 1440)&#x2F; 4 + (2560 * 1440)&#x2F; 4 &#x3D; 5529600</strong> </p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>YUV的是由过去黑白电视过度到彩色电视中的产物。它设计的初衷是为了使彩色电视能够兼容黑白电视。对于黑白电视信号，没有色度信息也就是(UV)，那么在彩色电视显示的时候指显示亮度信息。今天大家所讲的 YUV 其实就是指 YCbCr。Y 表示亮度（luma），CbCr 表示色度（chroma）。它应用在很多工业领域，是处理图像必备的基础之一。 </p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/85620611">https://zhuanlan.zhihu.com/p/85620611</a><br><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/YUV#YUV%E8%BD%89RGB">https://zh.wikipedia.org/wiki/YUV#YUV轉RGB</a><br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/384455058">https://zhuanlan.zhihu.com/p/384455058</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/xkuzhang/article/details/115423061">https://blog.csdn.net/xkuzhang/article/details/115423061</a><br><a target="_blank" rel="noopener" href="https://github.com/leandromoreira/digital_video_introduction/blob/master/README-cn.md#%E9%A2%9C%E8%89%B2%E6%A8%A1%E5%9E%8B">https://github.com/leandromoreira/digital_video_introduction/blob/master/README-cn.md#颜色模型</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/zh8706/article/details/100824484">https://blog.csdn.net/zh8706/article/details/100824484</a><br><a target="_blank" rel="noopener" href="https://rawpixels.net/">https://rawpixels.net/</a></p>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Cookies</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="https://cookies-blog.github.io/2022/11/14/%E7%90%86%E8%A7%A3YUV/">https://cookies-blog.github.io/2022/11/14/%E7%90%86%E8%A7%A3YUV/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2022 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2022/11/14/hello-world/">Hello World</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Cookies | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>
