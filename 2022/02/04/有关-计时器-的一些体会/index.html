@@ -224,8 +224,7 @@
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>以面向对象的角度来讲，计时器本身是提供了一个固定的功能用于间隔执行某种任务。无奈物理和平台的特性使得计时器不可避免的会出现误差。个人的体会是需要 <strong>熟悉 RunLoop 的机制、 GCD、 多线程的合理使用。</strong> 有意识的对特定的场景选择相应的计时器。最后还有个 CADisplayLink 这个东西，精度虽也行，但缺少了手动控制时间间隔的权利，显然不是太称职，所以放弃使用了。</p>
 <p>参考：</p>
 <ol>
-<li><a target="_blank" rel="noopener" href="https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Timers/Articles/timerConcepts.html">https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Timers/Articles/timerConcepts.html</a> </li>
-<li><a target="_blank" rel="noopener" href="https://juejin.cn/post/6979149280808271886#heading-3">https://juejin.cn/post/6979149280808271886#heading-3</a></li>
+<li><a target="_blank" rel="noopener" href="https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Timers/Articles/timerConcepts.html">Timer Programming Topics</a></li>
 <li><a target="_blank" rel="noopener" href="https://juejin.cn/post/6974614917315821604#heading-23">iOS底层原理-RunLoop - 掘金</a></li>
 <li><a target="_blank" rel="noopener" href="https://juejin.cn/post/6979149280808271886">深入浅出 GCD 之 dispatch_source - 掘金</a></li>
 </ol>
